@@ -1,0 +1,25 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Belief {
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  title            String
+  text             String
+  topics           Json     @default("[]")
+  author           String?
+  category         String?
+  approvalDetails  String?
+  sourceDate       String?
+  lastReviewDate   String?
+  certainty        String?
+  importance       String?
+}

@@ -1,0 +1,9 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Subtle card style for the belief text */
+.belief-box {
+  @apply p-4 rounded-lg border border-indigo-100 bg-indigo-50;
+}

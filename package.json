@@ -1,0 +1,32 @@
+{
+  "name": "belief-flashcards",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev --name init",
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "5.18.0",
+    "next": "14.2.5",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.30",
+    "@types/react": "18.2.67",
+    "@types/react-dom": "18.2.22",
+    "autoprefixer": "10.4.18",
+    "postcss": "8.4.35",
+    "prisma": "5.18.0",
+    "tailwindcss": "3.4.3",
+    "typescript": "5.4.5",
+    "ts-node": "10.9.2"
+  }
+}
