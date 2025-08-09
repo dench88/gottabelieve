@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 
     const newId =
       (globalThis as any).crypto?.randomUUID?.() ??
-      Math.random().toString(36).slice(2); // fallback
+      Math.random().toString(36).slice(2);
 
     const created = await prisma.belief.create({
       data: {
