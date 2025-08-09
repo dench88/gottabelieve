@@ -49,9 +49,11 @@ export default function BeliefForm({ initial, onCancel, onSaved }: Props) {
       body: JSON.stringify(payload),
     });
     if (!res.ok) {
-      alert('Save failed');
-      return;
-    }
+  const msg = await res.text().catch(() => '');
+  alert(msg || 'Save failed');
+  return;
+}
+
     const data = await res.json();
     onSaved(data);
   }
