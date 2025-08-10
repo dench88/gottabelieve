@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 
+// helper to format floats to 2dp
+const fmt2 = (n: number | null | undefined) =>
+  typeof n === 'number' ? n.toFixed(2) : '—';
+
+
 export type Belief = {
   id?: string;
   title: string;
@@ -122,13 +127,15 @@ export default function BeliefForm({ initial, onCancel, onSaved }: Props) {
               <input className="rounded border px-3 py-2" value={form.lastReviewDate ?? ''}
                      onChange={(e) => setForm({ ...form, lastReviewDate: e.target.value })} />
             </label>
-
             {/* Floats */}
             <label className="grid gap-1">
               <span className="text-sm font-medium">Certainty</span>
               <input
-                type="number" step="0.01" inputMode="decimal"
+                type="number"
+                step="0.01"
+                inputMode="decimal"
                 className="rounded border px-3 py-2"
+                placeholder="e.g. 0.75"
                 value={form.certainty}
                 onChange={(e) => {
                   const v = e.target.value;
@@ -136,11 +143,15 @@ export default function BeliefForm({ initial, onCancel, onSaved }: Props) {
                 }}
               />
             </label>
+            
             <label className="grid gap-1">
               <span className="text-sm font-medium">Importance</span>
               <input
-                type="number" step="0.01" inputMode="decimal"
+                type="number"
+                step="0.01"
+                inputMode="decimal"
                 className="rounded border px-3 py-2"
+                placeholder="e.g. 0.50"
                 value={form.importance}
                 onChange={(e) => {
                   const v = e.target.value;
@@ -148,6 +159,7 @@ export default function BeliefForm({ initial, onCancel, onSaved }: Props) {
                 }}
               />
             </label>
+
           </div>
 
           <div className="mt-2 flex justify-end gap-2">
