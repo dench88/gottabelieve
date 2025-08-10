@@ -39,6 +39,7 @@ function normalize(r: AnyRec) {
 
 export async function POST(req: Request) {
   try {
+    // Optional protection
     if (process.env.ADMIN_TOKEN) {
       const tok = req.headers.get('x-admin-token') || '';
       if (tok !== process.env.ADMIN_TOKEN) {
@@ -52,19 +53,30 @@ export async function POST(req: Request) {
       ? raw
       : Array.isArray(raw?.items)
       ? raw.items
-      : (() => { throw new Error('Expected a JSON array or {items:[...]}'); })();
+      : (() => {
+          throw new Error('Expected a JSON array or {items:[...]}');
+        })();
 
     let imported = 0;
     for (const rec of items) {
       const n = normalize(rec);
-      const id = n.id ?? ((globalThis as any).crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2));
+      const id =
+        n.id ??
+        ((globalThis as any).crypto?.randomUUID?.() ??
+          Math.random().toString(36).slice(2));
+
+      // Remove id from the spread object to avoid duplicate key
+      const { id: _drop, ...rest } = n;
+
       await prisma.belief.upsert({
         where: { id },
-        update: { ...n },
-        create: { id, ...n },
+        update: { ...rest },
+        create: { id, ...rest },
       });
+
       imported += 1;
     }
+
     return NextResponse.json({ ok: true, imported });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message ?? 'Import failed' }, { status: 400 });
