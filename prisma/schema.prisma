@@ -20,6 +20,7 @@ model Belief {
   approvalDetails String?
   sourceDate      String?
   lastReviewDate  String?
-  certainty       String?
-  importance      String?
+  certainty       Float?   
+  importance      Float?   
 }
+
