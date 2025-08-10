@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -13,8 +12,8 @@ export type Belief = {
   approvalDetails?: string | null;
   sourceDate?: string | null;
   lastReviewDate?: string | null;
-  certainty?: string | null;
-  importance?: string | null;
+  certainty?: number | null;   // ← floats now
+  importance?: number | null;  // ← floats now
 };
 
 type Props = {
@@ -23,8 +22,12 @@ type Props = {
   onSaved: (b: Belief) => void;
 };
 
+// Local form state lets the number inputs be '' while typing
+type FormState =
+  Omit<Belief, 'certainty' | 'importance'> & { certainty: number | ''; importance: number | '' };
+
 export default function BeliefForm({ initial, onCancel, onSaved }: Props) {
-  const [form, setForm] = useState<Belief>({
+  const [form, setForm] = useState<FormState>({
     title: initial?.title ?? '',
     text: (initial?.text ?? '').replace(/^\r?\n+/, ''),
     topics: initial?.topics ?? [],
@@ -33,14 +36,19 @@ export default function BeliefForm({ initial, onCancel, onSaved }: Props) {
     approvalDetails: initial?.approvalDetails ?? '',
     sourceDate: initial?.sourceDate ?? '',
     lastReviewDate: initial?.lastReviewDate ?? '',
-    certainty: initial?.certainty ?? '',
-    importance: initial?.importance ?? '',
+    certainty: typeof initial?.certainty === 'number' ? initial!.certainty! : '',
+    importance: typeof initial?.importance === 'number' ? initial!.importance! : '',
   });
 
   const isEdit = Boolean(initial?.id);
 
   async function submit() {
-    const payload = { ...form, topics: form.topics };
+    const payload: Belief = {
+      ...form,
+      certainty: form.certainty === '' ? null : form.certainty,
+      importance: form.importance === '' ? null : form.importance,
+    } as Belief;
+
     const endpoint = isEdit ? `/api/beliefs/${initial!.id}` : '/api/beliefs';
     const method = isEdit ? 'PUT' : 'POST';
     const res = await fetch(endpoint, {
@@ -49,11 +57,10 @@ export default function BeliefForm({ initial, onCancel, onSaved }: Props) {
       body: JSON.stringify(payload),
     });
     if (!res.ok) {
-  const msg = await res.text().catch(() => '');
-  alert(msg || 'Save failed');
-  return;
-}
-
+      const msg = await res.text().catch(() => '');
+      alert(msg || 'Save failed');
+      return;
+    }
     const data = await res.json();
     onSaved(data);
   }
@@ -81,7 +88,12 @@ export default function BeliefForm({ initial, onCancel, onSaved }: Props) {
             <span className="text-sm font-medium">Topics (one per line)</span>
             <textarea className="h-20 rounded border px-3 py-2"
                       value={form.topics.join('\n')}
-                      onChange={(e) => setForm({ ...form, topics: e.target.value.split('\n').map(s => s.trim()).filter(Boolean) })} />
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          topics: e.target.value.split('\n').map(s => s.trim()).filter(Boolean),
+                        })
+                      } />
           </label>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -110,15 +122,31 @@ export default function BeliefForm({ initial, onCancel, onSaved }: Props) {
               <input className="rounded border px-3 py-2" value={form.lastReviewDate ?? ''}
                      onChange={(e) => setForm({ ...form, lastReviewDate: e.target.value })} />
             </label>
+
+            {/* Floats */}
             <label className="grid gap-1">
               <span className="text-sm font-medium">Certainty</span>
-              <input className="rounded border px-3 py-2" value={form.certainty ?? ''}
-                     onChange={(e) => setForm({ ...form, certainty: e.target.value })} />
+              <input
+                type="number" step="0.01" inputMode="decimal"
+                className="rounded border px-3 py-2"
+                value={form.certainty}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setForm({ ...form, certainty: v === '' ? '' : Number(v) });
+                }}
+              />
             </label>
             <label className="grid gap-1">
               <span className="text-sm font-medium">Importance</span>
-              <input className="rounded border px-3 py-2" value={form.importance ?? ''}
-                     onChange={(e) => setForm({ ...form, importance: e.target.value })} />
+              <input
+                type="number" step="0.01" inputMode="decimal"
+                className="rounded border px-3 py-2"
+                value={form.importance}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setForm({ ...form, importance: v === '' ? '' : Number(v) });
+                }}
+              />
             </label>
           </div>
 
