@@ -3,22 +3,31 @@ export const runtime = 'nodejs';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-function requireAdmin(req: Request) {
-  const want = process.env.ADMIN_TOKEN;
-  if (!want) return true;
-  return req.headers.get('x-admin-token') === want;
-}
+const toTopics = (x: any): string[] => {
+  if (Array.isArray(x)) return x.map((t) => String(t));
+  if (!x) return [];
+  return String(x).split(',').map((s) => s.trim()).filter(Boolean);
+};
 
-// PUBLIC READ
+const toOptFloat = (v: any): number | null => {
+  if (v === null || v === undefined || v === '') return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+};
+
+const toOptString = (v: any): string | null => {
+  if (v === null || v === undefined) return null;
+  const s = String(v).trim();
+  return s === '' ? null : s;
+};
+
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   const item = await prisma.belief.findUnique({ where: { id: params.id } });
   if (!item) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(item);
 }
 
-// TOKEN REQUIRED FOR UPDATE/DELETE
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  if (!requireAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const body = await req.json();
     const updated = await prisma.belief.update({
@@ -26,14 +35,14 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       data: {
         title: String(body.title ?? ''),
         text: String(body.text ?? ''),
-        topics: Array.isArray(body.topics) ? body.topics.map(String) : [],
-        author: body.author ?? null,
-        category: body.category ?? null,
-        approvalDetails: body.approvalDetails ?? null,
-        sourceDate: body.sourceDate ?? null,
-        lastReviewDate: body.lastReviewDate ?? null,
-        certainty: body.certainty === '' ? null : Number(body.certainty),
-        importance: body.importance === '' ? null : Number(body.importance),
+        topics: toTopics(body.topics),
+        author: toOptString(body.author),
+        category: toOptString(body.category),
+        approvalDetails: toOptString(body.approvalDetails),
+        sourceDate: toOptString(body.sourceDate),
+        lastReviewDate: toOptString(body.lastReviewDate),
+        certainty: toOptFloat(body.certainty),
+        importance: toOptFloat(body.importance),
       },
     });
     return NextResponse.json(updated);
@@ -42,8 +51,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  if (!requireAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export async function DELETE(_: Request, { params }: { params: { id: string } }) {
   await prisma.belief.delete({ where: { id: params.id } });
   return NextResponse.json({ ok: true });
 }
