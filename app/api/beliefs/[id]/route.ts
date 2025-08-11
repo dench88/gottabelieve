@@ -3,6 +3,12 @@ export const runtime = 'nodejs';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+function requireAdmin(req: Request) {
+  const want = process.env.ADMIN_TOKEN;
+  if (!want) return true;
+  return req.headers.get('x-admin-token') === want;
+}
+
 const toTopics = (x: any): string[] => {
   if (Array.isArray(x)) return x.map((t) => String(t));
   if (!x) return [];
