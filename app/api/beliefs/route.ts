@@ -3,51 +3,32 @@ export const runtime = 'nodejs';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// helper: require ADMIN_TOKEN for writes
 function requireAdmin(req: Request) {
   const want = process.env.ADMIN_TOKEN;
-  if (!want) return true; // if not set, don't lock you out
+  if (!want) return true;
   return req.headers.get('x-admin-token') === want;
 }
 
-const toTopics = (x: any): string[] => {
-  if (Array.isArray(x)) return x.map((t) => String(t));
-  if (!x) return [];
-  return String(x).split(',').map((s) => s.trim()).filter(Boolean);
-};
+const toTopics = (x: any): string[] =>
+  Array.isArray(x) ? x.map(String) : String(x || '').split(',').map(s => s.trim()).filter(Boolean);
+const toOptFloat = (v: any): number | null => (v === '' || v == null ? null : (Number.isFinite(Number(v)) ? Number(v) : null));
+const toOptString = (v: any): string | null => (v == null ? null : (String(v).trim() || null));
 
-const toOptFloat = (v: any): number | null => {
-  if (v === null || v === undefined || v === '') return null;
-  const n = Number(v);
-  return Number.isFinite(n) ? n : null;
-};
-
-const toOptString = (v: any): string | null => {
-  if (v === null || v === undefined) return null;
-  const s = String(v).trim();
-  return s === '' ? null : s;
-};
-
+// READS MUST BE PUBLIC
 export async function GET() {
-  try {
-    const items = await prisma.belief.findMany({ orderBy: { createdAt: 'asc' } });
-    return NextResponse.json(items);
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? 'Error fetching beliefs' }, { status: 500 });
-  }
+  const items = await prisma.belief.findMany({ orderBy: { createdAt: 'asc' } });
+  return NextResponse.json(items);
 }
 
+// WRITES REQUIRE TOKEN
 export async function POST(req: Request) {
+  if (!requireAdmin(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const body = await req.json();
-
-    const newId =
-      (globalThis as any).crypto?.randomUUID?.() ??
-      Math.random().toString(36).slice(2);
-
+    const id = (globalThis as any).crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2);
     const created = await prisma.belief.create({
       data: {
-        id: newId,
+        id,
         title: String(body.title ?? ''),
         text: String(body.text ?? ''),
         topics: toTopics(body.topics),
@@ -60,7 +41,6 @@ export async function POST(req: Request) {
         importance: toOptFloat(body.importance),
       },
     });
-
     return NextResponse.json(created, { status: 201 });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message ?? 'Save failed' }, { status: 500 });
