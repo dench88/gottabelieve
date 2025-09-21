@@ -1,0 +1,39 @@
+# --- Node / Next.js ---
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Env & secrets (keep them OUT of Git) ---
+.env
+.env.*
+!.env.example         # commit a template only (no secrets)
+
+# --- Vercel (local link metadata) ---
+.vercel/
+
+# --- Prisma (SQLite artifacts if ever used locally) ---
+prisma/*.db
+prisma/*.db-journal
+
+# --- IDE / OS cruft ---
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# --- Python (your PyCharm venv etc.) ---
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+
+# --- Local helper scripts you don't want shared ---
+node-local.ps1
+250815_notes.txt
