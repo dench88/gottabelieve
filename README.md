@@ -94,6 +94,22 @@ VALUES ('Test belief','Hello world','active',3);
 
 ---
 
+### 1.5 New laptop setup
+
+If you’re cloning this repo on a new machine:
+
+1. Install Python (add to PATH) and Node.js LTS (MSI installer).
+2. Clone the repo into `Documents\GitHub\gottabelieve`.
+3. Create a venv (optional, only if you need Python helpers):
+   ```powershell
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   python -m pip install -U pip
+4. Run npm install
+5. copy secrets to .env
+6. Run app
+    npm run dev
+
 ## 2) Daily workflow
 
 ```powershell
