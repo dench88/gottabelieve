@@ -83,8 +83,8 @@ export default function BeliefForm({ initial, onCancel, onSaved }: Props) {
           </label>
 
           <label className="grid gap-1">
-            <span className="text-sm font-medium">Text</span>
-            <textarea className="block w-full rounded border px-3 py-2 resize-none overflow-y-auto min-h-[10rem] max-h-[10rem]"
+            <span className="text-sm font-medium">Belief Text</span>
+            <textarea className="block w-full rounded border px-3 py-2 resize-y"
                       value={form.text}
                       onChange={(e) => setForm({ ...form, text: e.target.value })} />
           </label>

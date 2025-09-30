@@ -47,17 +47,16 @@ export default function BeliefApp() {
       <h2 className="text-2xl font-semibold">{current?.title ?? ''}</h2>
 
       {/* Text in box, strip leading CR/LF */}
-      <div className="belief-box whitespace-pre-wrap">
+      <div className="belief-box whitespace-pre-wrap h-40 overflow-y-auto rounded border p-2">
         {(current?.text ?? '').replace(/^\r?\n+/, '')}
       </div>
+
 
       {/* Topics under text, each on its own line */}
       <div>
         <div className="text-sm text-slate-500">Topics</div>
         <div className="text-sm">
-          {(current?.topics ?? []).map((t, i) => (
-            <div key={i}>{t}</div>
-          ))}
+          {(current?.topics ?? []).join(", ")}
         </div>
       </div>
 
